@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Tip of the Day</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1a1a2e;
+        --cream: #f5f0e8;
+        --amber: #e8a838;
+        --amber-glow: #f0c060;
+        --sage: #7a9e7e;
+        --blush: #d4a0a0;
+        --card-bg: #fffdf8;
+        --shadow: rgba(26, 26, 46, 0.08);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--cream);
+        color: var(--ink);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* — Grain overlay — */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        opacity: 0.03;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 256px;
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      /* — Decorative background shapes — */
+      .bg-shape {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.25;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .bg-shape--1 {
+        width: 500px;
+        height: 500px;
+        background: var(--amber);
+        top: -150px;
+        right: -100px;
+      }
+      .bg-shape--2 {
+        width: 400px;
+        height: 400px;
+        background: var(--sage);
+        bottom: -100px;
+        left: -80px;
+      }
+      .bg-shape--3 {
+        width: 300px;
+        height: 300px;
+        background: var(--blush);
+        top: 50%;
+        left: 60%;
+        opacity: 0.15;
+      }
+
+      /* — Layout — */
+      .container {
+        position: relative;
+        z-index: 1;
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 60px 24px 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      /* — Header — */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--ink);
+        color: var(--cream);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 8px 18px;
+        border-radius: 100px;
+        margin-bottom: 32px;
+        animation: fadeDown 0.8s ease-out both;
+      }
+      .badge::before {
+        content: "✦";
+        color: var(--amber);
+        font-size: 13px;
+      }
+
+      h1 {
+        font-family: "Instrument Serif", serif;
+        font-size: clamp(2.8rem, 6vw, 4.2rem);
+        font-weight: 400;
+        line-height: 1.1;
+        text-align: center;
+        margin-bottom: 12px;
+        animation: fadeDown 0.8s 0.1s ease-out both;
+      }
+      h1 em {
+        font-style: italic;
+        color: var(--sage);
+      }
+
+      .subtitle {
+        font-size: 1.05rem;
+        color: #666;
+        text-align: center;
+        max-width: 440px;
+        line-height: 1.6;
+        margin-bottom: 48px;
+        animation: fadeDown 0.8s 0.2s ease-out both;
+      }
+
+      /* — Card — */
+      .card {
+        background: var(--card-bg);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 20px;
+        padding: 48px 40px 40px;
+        width: 100%;
+        box-shadow:
+          0 1px 2px var(--shadow),
+          0 8px 24px var(--shadow),
+          0 24px 48px rgba(26, 26, 46, 0.04);
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.8s 0.3s ease-out both;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--amber),
+          var(--sage),
+          var(--blush)
+        );
+      }
+
+      .card__category {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: var(--sage);
+        background: rgba(122, 158, 126, 0.1);
+        padding: 6px 14px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+
+      .card__fact {
+        font-family: "Instrument Serif", serif;
+        font-size: clamp(1.4rem, 3vw, 1.75rem);
+        line-height: 1.5;
+        color: var(--ink);
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+      }
+      .card__fact.loading {
+        color: #aaa;
+        font-family: "DM Sans", sans-serif;
+        font-size: 1rem;
+      }
+
+      .card__source {
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .card__api {
+        font-size: 0.8rem;
+        color: #999;
+      }
+      .card__api code {
+        background: rgba(0, 0, 0, 0.04);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+      }
+
+      /* — Button — */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--ink);
+        color: var(--cream);
+        border: none;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 14px 28px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(26, 26, 46, 0.18);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn.spinning .btn__icon {
+        animation: spin 0.6s ease-in-out;
+      }
+      .btn__icon {
+        font-size: 1.1rem;
+        transition: transform 0.3s ease;
+      }
+
+      /* — Counter — */
+      .counter {
+        margin-top: 40px;
+        text-align: center;
+        animation: fadeUp 0.8s 0.5s ease-out both;
+      }
+      .counter__number {
+        font-family: "Instrument Serif", serif;
+        font-size: 3rem;
+        color: var(--amber);
+        line-height: 1;
+      }
+      .counter__label {
+        font-size: 0.8rem;
+        color: #999;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-top: 4px;
+      }
+
+      /* — Footer — */
+      .footer {
+        margin-top: auto;
+        padding-top: 60px;
+        text-align: center;
+        animation: fadeUp 0.8s 0.6s ease-out both;
+      }
+      .footer__text {
+        font-size: 0.8rem;
+        color: #aaa;
+      }
+      .footer__text a {
+        color: var(--sage);
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.2s;
+      }
+      .footer__text a:hover {
+        border-bottom-color: var(--sage);
+      }
+
+      /* — Fact transition — */
+      .card__fact.fade-out {
+        opacity: 0;
+        transform: translateY(8px);
+        transition: all 0.25s ease-in;
+      }
+      .card__fact.fade-in {
+        opacity: 0;
+        transform: translateY(-8px);
+        animation: fadeIn 0.4s 0.1s ease-out forwards;
+      }
+
+      /* — Error — */
+      .error {
+        color: var(--blush);
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.95rem;
+      }
+
+      /* — Animations — */
+      @keyframes fadeDown {
+        from {
+          opacity: 0;
+          transform: translateY(-16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeIn {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* — Responsive — */
+      @media (max-width: 520px) {
+        .container {
+          padding: 40px 16px 60px;
+        }
+        .card {
+          padding: 32px 24px 28px;
+        }
+        .card__source {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-shape bg-shape--1"></div>
+    <div class="bg-shape bg-shape--2"></div>
+    <div class="bg-shape bg-shape--3"></div>
+
+    <div class="container">
+      <div class="badge">Personal Project</div>
+
+      <h1>Your Daily Dose<br />of <em>Curiosity</em></h1>
+      <p class="subtitle">
+        A random fact fetched from a live API, styled and served fresh, because
+        learning should look good!
+      </p>
+
+      <div class="card">
+        <span class="card__category" id="category">Random Fact</span>
+        <div class="card__fact loading" id="fact">
+          Fetching something interesting…
+        </div>
+        <div class="card__source">
+          <span class="card__api"
+            >Source: <code>uselessfacts.jsph.pl</code></span
+          >
+          <button class="btn" id="newFactBtn" onclick="fetchFact()">
+            <span class="btn__icon">↻</span>
+            New Fact
+          </button>
+        </div>
+      </div>
+
+      <div class="counter">
+        <div class="counter__number" id="count">0</div>
+        <div class="counter__label">Facts explored</div>
+      </div>
+
+      <footer class="footer">
+        <p class="footer__text">
+          Built by <a href="#">Tiffany</a> · Powered by a public REST API · 2026
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      let factCount = 0;
+      const factEl = document.getElementById("fact");
+      const countEl = document.getElementById("count");
+      const btn = document.getElementById("newFactBtn");
+      const categoryEl = document.getElementById("category");
+
+      const categories = [
+        "Random Fact",
+        "Did You Know?",
+        "Mind Bender",
+        "Knowledge Drop",
+        "Fun Fact",
+        "Brain Snack",
+      ];
+
+      async function fetchFact() {
+        // Add spin animation to button
+        btn.classList.add("spinning");
+        setTimeout(() => btn.classList.remove("spinning"), 600);
+
+        // Fade out current fact
+        factEl.classList.add("fade-out");
+        factEl.classList.remove("fade-in");
+
+        try {
+          const response = await fetch(
+            "https://uselessfacts.jsph.pl/api/v2/facts/random?language=en",
+          );
+
+          if (!response.ok) throw new Error("API returned " + response.status);
+
+          const data = await response.json();
+
+          // Wait for fade-out to finish
+          setTimeout(() => {
+            factEl.textContent = data.text;
+            factEl.classList.remove("loading", "fade-out", "error");
+            factEl.classList.add("fade-in");
+
+            // Update counter
+            factCount++;
+            countEl.textContent = factCount;
+            countEl.style.animation = "none";
+            countEl.offsetHeight; // trigger reflow
+            countEl.style.animation = "fadeIn 0.3s ease-out";
+
+            // Rotate category label
+            categoryEl.textContent =
+              categories[Math.floor(Math.random() * categories.length)];
+          }, 280);
+        } catch (err) {
+          setTimeout(() => {
+            factEl.innerHTML =
+              '<span class="error">Couldn\'t reach the API — check your connection and try again.</span>';
+            factEl.classList.remove("loading", "fade-out");
+            factEl.classList.add("fade-in");
+          }, 280);
+        }
+      }
+
+      // Fetch first fact on page load
+      fetchFact();
+    </script>
+  </body>
+</html>
